@@ -106,7 +106,8 @@ function getDataType(field) {
 
   const typeLength = !_.isNull(length) ? length : '';
   if (attr.match(/^(smallint|mediumint|tinyint|int)/)) {
-    let type = `DataTypes.INTEGER${typeLength}`;
+    // let type = `DataTypes.INTEGER${typeLength}`;
+    let type = 'DataTypes.INTEGER';
     const unsigned = attr.match(/unsigned/i);
     if (unsigned) {
       type += '.UNSIGNED';

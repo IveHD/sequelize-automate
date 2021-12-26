@@ -1,6 +1,3 @@
-import { Sequelize, DataTypes } from 'sequelize';
-
-
 export default function(sequelize: Sequelize) {
   const attributes = {
     id: {

@@ -14,7 +14,7 @@ function generate(definition, options) {
     case 'js':
       return processJS(definition, { isEgg: false });
     case 'ts':
-      return processTS(definition, { tsNoCheck });
+      return processTS(definition, { tsNoCheck, ...options });
     case 'egg':
       return processJS(definition, { isEgg: true });
     case 'midway':

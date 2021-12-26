@@ -1,0 +1,15 @@
+import { Sequelize } from '@fdfe/zebra-sequelize-client';
+import zebraClient from '@/lib/zebra';
+
+const { DataTypes, Model } = Sequelize;
+
+class {{ modelName }} extends Model {
+  {{ modelProperties }}
+  {{ modelMethods }}
+}
+
+const attributes = {{ attributes }};
+const initOptions = {{ initOptions }};
+{{ modelName }}.init(attributes, initOptions);
+
+export default {{ modelName }};

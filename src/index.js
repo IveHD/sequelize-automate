@@ -20,7 +20,7 @@ class Automate {
       tables: null, // Use these tables, Example: ['user'], default is null.
       skipTables: null, // Skip these tables. Example: ['user'], default is null.
       tsNoCheck: false, // Whether add `@ts-nocheck` to model files, default is false.
-      match: null // Regex to match table name
+      match: null, // Regex to match table name
     };
 
     // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
@@ -49,7 +49,7 @@ class Automate {
     // TODO: check all dialects https://github.com/sequelize/sequelize/issues/11451
     const allTableNames = await this.queryInterface.showAllTables();
 
-    let tableNames = allTableNames;
+    const tableNames = allTableNames;
 
     const allTables = _.map(tableNames, (tableName) => (
       _.isPlainObject(tableName) ? tableName.tableName : tableName
@@ -68,7 +68,7 @@ class Automate {
 
     if (match && (_.isRegExp(match) || _.isString(match))) {
       const regex = _.isRegExp(match) ? match : new RegExp(match);
-      return allTables.filter(table => regex.test(table));
+      return allTables.filter((table) => regex.test(table));
     }
 
     return allTables;
@@ -124,6 +124,7 @@ class Automate {
       tables,
       skipTables,
     });
+
     const definitions = getModelDefinitions(allTables, {
       camelCase,
       fileNameCamelCase,
@@ -136,27 +137,14 @@ class Automate {
 
   async run() {
     const {
-      type,
-      tables,
-      skipTables,
-      camelCase,
-      fileNameCamelCase,
-      tsNoCheck,
       dir,
       typesDir,
       emptyDir,
     } = this.options;
-    const definitions = await this.getDefinitions({
-      tables,
-      skipTables,
-      camelCase,
-      fileNameCamelCase,
-    });
 
-    const codes = generate(definitions, {
-      type,
-      tsNoCheck,
-    });
+    const definitions = await this.getDefinitions(this.options);
+
+    const codes = generate(definitions, this.options);
     if (dir) {
       await write(codes, { dir, typesDir, emptyDir });
     }

@@ -60,7 +60,7 @@ function processFieldProperties(field) {
         properties.push(
           t.objectProperty(
             t.identifier(key),
-            _.isString(value) ? t.stringLiteral(value) : t.nullLiteral(),
+            _.isString(value) ? t.stringLiteral(value) : t.stringLiteral(''),
           ),
         );
         break;
@@ -116,7 +116,59 @@ function processAttributesProperties(attributes) {
       ),
     );
   });
-  return properties;
+  return t.objectExpression(properties);
+}
+
+
+function processOptionsPropertiesByDefinition(definition) {
+  const indexes = [];
+  (definition.indexes || []).forEach((e) => {
+    const o = t.objectExpression([
+      t.objectProperty(
+        t.identifier('name'),
+        t.stringLiteral(e.name),
+      ),
+      t.objectProperty(
+        t.identifier('unique'),
+        t.booleanLiteral(e.unique),
+      ),
+      t.objectProperty(
+        t.identifier('using'),
+        t.stringLiteral(e.type),
+      ),
+      t.objectProperty(
+        t.identifier('fields'),
+        t.arrayExpression(e.fields.map((f) => t.stringLiteral(f))),
+      ),
+    ]);
+    indexes.push(o);
+  });
+  return t.arrayExpression(indexes);
+}
+
+function processOptionsByDefinition(definition) {
+  return t.objectExpression([
+    t.objectProperty(
+      t.identifier('modelName'),
+      t.stringLiteral(definition.tableName),
+    ),
+    t.objectProperty(
+      t.identifier('sequelize'),
+      t.identifier('zebraClient'),
+    ),
+    t.objectProperty(
+      t.identifier('freezeTableName'),
+      t.booleanLiteral(true),
+    ),
+    t.objectProperty(
+      t.identifier('timestamps'),
+      t.booleanLiteral(true),
+    ),
+    t.objectProperty(
+      t.identifier('indexes'),
+      processOptionsPropertiesByDefinition(definition),
+    ),
+  ]);
 }
 
 function processOptionsProperties(nodes, definition) {
@@ -164,6 +216,46 @@ function processOptionsProperties(nodes, definition) {
   });
 }
 
+function getTypeKeyword(type) {
+  if (type.indexOf('DataTypes.BOOLEAN') > -1) {
+    return t.tsBooleanKeyword();
+  }
+  if (type.indexOf('DataTypes.INTEGER') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.BIGINT') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.STRING') > -1) {
+    return t.tsStringKeyword();
+  }
+  if (type.indexOf('DataTypes.CHAR') > -1) {
+    return t.tsStringKeyword();
+  }
+  if (type.indexOf('DataTypes.REAL') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.TEXT') > -1) {
+    return t.tsStringKeyword();
+  }
+  if (type.indexOf('DataTypes.DATE') > -1) {
+    // return t.genericTypeAnnotation(t.identifier('Date'));
+    return t.tsStringKeyword();
+  }
+  if (type.indexOf('DataTypes.FLOAT') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.DECIMAL') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.DOUBLE') > -1) {
+    return t.tsNumberKeyword();
+  }
+  if (type.indexOf('DataTypes.UUIDV4') > -1) {
+    return t.tsStringKeyword();
+  }
+  return t.tsAnyKeyword();
+}
 
 /**
  * get object type annotation
@@ -216,5 +308,8 @@ module.exports = {
   processFieldProperties,
   processAttributesProperties,
   processOptionsProperties,
+  processOptionsPropertiesByDefinition,
+  processOptionsByDefinition,
   getObjectTypeAnnotation,
+  getTypeKeyword,
 };
